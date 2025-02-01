@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import re
 
 load_dotenv()
-openai.api_key = os.getenv("API_KEY_LLM")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def generate_text(prompt: str, model="gpt-4o-mini") -> str:
     """Generate a single completion from ChatGPT."""
