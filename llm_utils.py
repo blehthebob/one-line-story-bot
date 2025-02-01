@@ -6,17 +6,8 @@ import re
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def generate_text(prompt: str, model="gpt-4o-mini") -> str:
-    """Generate a single completion from ChatGPT."""
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=100,
-        temperature=0.7
-    )
-    return response['choices'][0]['message']['content']
 
-def generate_next_line_candidates_list(story_context: str, num_candidates=3, model="gpt-3.5-turbo") -> list:
+def generate_next_line_candidates_list(story_context: str, num_candidates=3, model="gpt-4o-mini") -> list:
     system_prompt = (
         "You are a creative writing assistant. "
         "I will provide a story so far, and you will generate a numbered list of possible next lines."
