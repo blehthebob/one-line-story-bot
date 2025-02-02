@@ -2,24 +2,33 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 import re
+import json
 
 load_dotenv()
 client = OpenAI(
     api_key = os.environ.get("OPENAI_API_KEY")
 )
 
+##########################################################
+######################## Text Gen ########################
+##########################################################
 
 def generate_next_line_candidates_list(story_context: str, num_candidates=3, model="gpt-4o-mini") -> list:
     system_prompt = (
-        "You are a creative writing assistant. "
-        "I will provide a story so far, and you will generate a numbered list of possible next lines."
+    "You are a creative writing assistant."
+    "I will provide a story so far, and you will generate multiple possible next lines in JSON format."
     )
 
     user_prompt = (
-        f"Story so far:\n{story_context}\n\n"
-        f"Please provide exactly {num_candidates} possible next lines. Each line should be 1-2 sentences. "
-        f"Format them as a list:\n\n"
-        f"1) ...\n2) ...\n3) ..."
+    f"Story so far:\n{story_context}\n\n"
+    f"Please provide exactly {num_candidates} possible next lines. "
+    f"Format them as a JSON list where each item is a dictionary with a 'text' key.\n\n"
+    f"Example output:\n"
+    f"[\n"
+    f'    {{"text": "...option 1..."}},\n'
+    f'    {{"text": "...option 2..."}},\n'
+    f'    {{"text": "...option 3..."}}\n'
+    f"]"
     )
 
     response = client.chat.completions.create(
@@ -36,23 +45,22 @@ def generate_next_line_candidates_list(story_context: str, num_candidates=3, mod
     chat_completion = choices[0]
     content = chat_completion.message.content
 
-    # candidates = parse_candidates_from_list(content, num_candidates)
-    print(content)
     return content
 
-def parse_candidates_from_list(response_text: str, num_candidates: int) -> list:
-
-    pattern = r"\d)\s?(.*)"
-    matches = re.findall(pattern, response_text)
-
-# Truncate or fill in if the model returns more/less than desired
-    matches = matches[:num_candidates]
-
-    matches = [m.strip() for m in matches if m.strip()]
-    return matches
 Story = "Once upon a time there was a space cat who was very cute she loved to"
-generate_next_line_candidates_list(Story)
 
+llm_output = generate_next_line_candidates_list(Story)
+print(llm_output)
+
+options = json.loads(llm_output)
+selected_option = options[1]["text"]
+Story += " " + selected_option
+
+print(Story)
+
+###########################################################
+######################## Image Gen ########################
+###########################################################
 
 def generate_image(prompt):
     response =client.images.generate(
@@ -66,7 +74,6 @@ def generate_image(prompt):
     print(image_url)
     return image_url
 
-generate_image("lunar new year")
 # @bot.command()
 # async def generate_image(ctx, *, prompt: str):
 #     try:
