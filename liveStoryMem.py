@@ -1,8 +1,12 @@
 from datetime import datetime
 from llm_utils import *
+from imgToVid import *
+import requests
+
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+
 # A global or module-level dictionary for active stories (story_id -> story_data)
 active_stories = {}
 
@@ -162,8 +166,21 @@ def update_story_summary(story_data: dict, new_summary: str):
     story_data["storySummary"] = new_summary
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
 
+def save_graph(story_id):
+    folder_path = f"Stories/{story_id}/Graphs"
+    os.makedirs(folder_path, exist_ok=True)
+
+    existing_files = [f for f in os.listdir(folder_path) if f.endswith(".png")]
+
+    next_number = len(existing_files) + 1
+    file_name = f"graph_{next_number}.png"
+    file_path = os.path.join(folder_path, file_name)
+
+    plt.savefig(file_path, format="png", dpi=300)
+    #print(f"Graph saved as: {file_path}")
+
 #function to create graph
-def creategraph(characters):
+def create_graph(characters, story_id):
     print(len(characters))
     if len(characters)>0:
         # Create a MultiDiGraph (allows multiple edges)
@@ -247,10 +264,13 @@ def creategraph(characters):
             # Draw the edge labels (opinion text and trust level) without modifying node positions
             nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v, key): label}, font_size=8, verticalalignment="center", horizontalalignment="center", label_pos=0.5,connectionstyle=f"arc3,rad={0.1 * offset}")
 
+
         # Title and show the plot
         plt.title("Character Relationships Graph")
         plt.axis('off')  # Hide the axes for better visualization
-        plt.show()
+
+        save_graph(story_id)
+
 
 def add_new_line_and_update(story_data: dict, new_line: str, added_by: str):
     """
@@ -363,7 +383,8 @@ def add_characters(story_data: dict, characters: list):
             existing_characters.append(new_char)
 
     story_data["characters"] = existing_characters
-    creategraph(existing_characters)
+    story_id = story_data["story_Id"]
+    create_graph(existing_characters, story_id)
 
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
 
@@ -430,8 +451,106 @@ def finalize_story(story_id: str) -> dict:
     update_story_summary(story_data, story_summary)
 
     story_data = active_stories.pop(story_id, None)
+
+    story_id = story_data["story_Id"]
+
+    ##final_image_url = generate_final_image(build_dalle_prompt(story_data)) ## Comment to save money
+    ##imgName = story_data["title"]## Comment to save money
+    ##story_id = story_data["story_Id"]
+    ##save_image(final_image_url, folder=f"Stories/{story_id}" filename=f"{imgName}.png") ## Comment to save money
+
+    save_story_data(story_data, folder=f"Stories/{story_id}")
+
+    images_to_video(f"Stories/{story_id}/Graphs", f"Stories/{story_id}/ConnectionsTimeline.mp4")
+
     return story_data
 
+def save_story_data(story_data, folder="Stories"):
+    title = story_data["title"]
+    filename=f"{title}.json"
+    os.makedirs(folder, exist_ok=True)
+
+    file_path = os.path.join(folder, filename)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(story_data, f, indent=4) 
+
+    print(f"Story data saved to {file_path}")
+
+    return story_data
+
+def save_image(image_url, folder="Stories", filename="generated_image.png"):
+    image_data = requests.get(image_url).content
+    os.makedirs(folder, exist_ok=True)
+
+    file_path = os.path.join(folder, filename)
+    # Write the content to a file
+    with open(file_path, "wb") as file:
+        file.write(image_data)
+    print(f"Saved image to {filename}")
+
+def build_dalle_prompt(story_data: dict) -> str:
+    metadata = story_data["storyMetadata"]
+    title = story_data["title"]
+    genre = metadata.get("genre", "")
+    tone = metadata.get("tone", "")
+    style = metadata.get("style", "")
+    keywords = ", ".join(metadata.get("themeKeywords", []))
+    
+    # Summarize characters
+    character_summaries = []
+    for char in story_data.get("characters", []):
+        name = char.get("name", "Unknown Character")
+        traits = ", ".join(char.get("traits", []))
+        desc = f"{name} ({traits})" if traits else name
+        character_summaries.append(desc)
+    characters_str = "\n- " + "\n- ".join(character_summaries) if character_summaries else "None"
+    
+    # Summarize settings
+    setting_summaries = []
+    for setting in story_data.get("settings", []):
+        location = setting.get("locationName", "Unknown Location")
+        set_desc = setting.get("description", "")
+        setting_summaries.append(f"{location}: {set_desc}")
+    settings_str = "\n".join(setting_summaries) if setting_summaries else "No specific setting"
+
+    # Possibly a truncated or summarized version of the story text
+    story_desc = story_data.get("storySummary", "") 
+    
+    prompt = f"""
+Create an illustration inspired by the following story and its metadata:
+
+Title: {title}
+Genre: {genre}
+Tone: {tone}
+Art Style: {style}
+Theme Keywords: {keywords}
+
+Story Description:
+"{story_desc}"
+
+Key Characters:{characters_str}
+
+Setting:
+{settings_str}
+
+Art Direction:
+- Reflect the story’s {genre} genre and maintain a {tone} atmosphere.
+- Incorporate visual elements that hint at {keywords}, ensuring a cohesive look.
+- Depict the characters and setting in a scene representing the central conflict or theme.
+- Aim for a {style} style (or related visual approach).
+- Emphasize the emotional essence that fits the story's tone and theme.
+
+Color Palette & Composition:
+- Suggest a palette that conveys {tone} vibe.
+- Composition can be cinematic, minimalist, or surreal as needed.
+
+Please produce a image with enough detail to capture the story’s essence and characters in a single, cohesive scene.
+"""
+    return prompt.strip()
+
+
+    
 # Example use
 story_id = 1234
 create_story(story_id, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")

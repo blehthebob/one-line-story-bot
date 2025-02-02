@@ -1,0 +1,95 @@
+{
+    "storyId": 1234,
+    "title": "Dreams of a Sleepy Student",
+    "currentStoryText": "Once upon time there was a very sleep university student who wanted to find a way to stay awake long enough to finish his assignments, yet the weight of drowsiness pulled him deeper into the abyss of his dreams. So he decided to leap in to see what he would find As he plummeted into the depths of his slumber, he realized that perhaps the true assignment was not to fight sleep, but to embrace the dreams that awaited him.",
+    "storyMetadata": {
+        "genre": "Fantasy",
+        "tone": "Whimsical",
+        "style": "Concise",
+        "promptPersonality": "desolate",
+        "themeKeywords": [
+            "dreams",
+            "sleep",
+            "self-discovery",
+            "embrace",
+            "challenges"
+        ],
+        "createdBy": "me",
+        "creationDate": "2025-02-02T06:34:46.185353",
+        "lastUpdated": "2025-02-02T06:35:29.352843"
+    },
+    "lines": [
+        {
+            "lineId": "line-001",
+            "text": "Once upon time there was a very sleep university student who wanted to",
+            "addedBy": "me",
+            "timestamp": "2025-02-02T06:34:46.185353"
+        },
+        {
+            "lineId": "line-002",
+            "text": "find a way to stay awake long enough to finish his assignments, yet the weight of drowsiness pulled him deeper into the abyss of his dreams.",
+            "addedBy": "llm",
+            "timestamp": "2025-02-02T06:34:50.187958"
+        },
+        {
+            "lineId": "line-003",
+            "text": "So he decided to leap in to see what he would find",
+            "addedBy": "me",
+            "timestamp": "2025-02-02T06:35:13.896576"
+        },
+        {
+            "lineId": "line-004",
+            "text": "As he plummeted into the depths of his slumber, he realized that perhaps the true assignment was not to fight sleep, but to embrace the dreams that awaited him.",
+            "addedBy": "llm",
+            "timestamp": "2025-02-02T06:35:24.894458"
+        }
+    ],
+    "storySummary": "{\n  \"summary\": \"A sleep-deprived university student contemplates the struggle between staying awake to finish his assignments and succumbing to sleep, ultimately discovering that embracing his dreams may hold greater significance than resisting them.\"\n}",
+    "characters": [
+        {
+            "name": "University Student",
+            "description": "A very sleepy student struggling to stay awake while completing assignments.",
+            "status": "Exhausted and determined",
+            "traits": [
+                "determined",
+                "overworked",
+                "dreamy"
+            ],
+            "opinionsOf": []
+        },
+        {
+            "name": "Sleepy Student",
+            "description": "A university student battling overwhelming drowsiness while trying to complete assignments.",
+            "status": "Determined to stay awake",
+            "traits": [
+                "persistent",
+                "tired",
+                "curious"
+            ],
+            "opinionsOf": []
+        }
+    ],
+    "settings": [
+        {
+            "locationName": "University Campus",
+            "description": "A bustling environment filled with students, libraries, and coffee shops, providing a backdrop for late-night studies.",
+            "keyDetails": [
+                "libraries open late",
+                "multiple coffee shops",
+                "study areas"
+            ]
+        },
+        {
+            "locationName": "Abyss of Dreams",
+            "description": "A mysterious, surreal realm that embodies the depths of sleep and dreams.",
+            "keyDetails": [
+                "Ethereal landscapes",
+                "Shifting shadows",
+                "Whispers of forgotten thoughts"
+            ]
+        }
+    ],
+    "storyConfig": {
+        "language": "English"
+    }
+}

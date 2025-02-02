@@ -100,7 +100,7 @@ def accept_winning_line(llm_output, chosen_line: int):
 ######################## Image Gen ########################
 ###########################################################
 
-def generate_image(prompt):
+def generate_final_image(prompt):
     response =client.images.generate(
         model ="dall-e-3",
         prompt=prompt,
@@ -131,7 +131,7 @@ def generate_image(prompt):
 
 
 ###########################################################
-######################## Metadata Population ########################
+######################## Metadata Population ##############
 ###########################################################
 
 
@@ -156,3 +156,5 @@ def call_llm_api(request: str, model="gpt-4o-mini") -> list:
     content = chat_completion.message.content
 
     return content
+
+
