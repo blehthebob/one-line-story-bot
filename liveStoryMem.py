@@ -3,7 +3,7 @@ from llm_utils import *
 # A global or module-level dictionary for active stories (story_id -> story_data)
 active_stories = {}
 
-def create_story(story_id: str, starter_line: str, personality: str, user_id: str):
+def create_story(story_id: str, starter_line: str, personality: str, user_id: str): # all this info is from discord / we create it
     """
     1) Initialize the in-memory JSON structure
     2) Use LLM to fill in initial metadata (title, genre, tone, style, theme keywords)
@@ -51,7 +51,7 @@ def create_story(story_id: str, starter_line: str, personality: str, user_id: st
     return story_data
 
 
-def generate_initial_story_metadata(starter_line: str) -> dict:
+def generate_initial_story_metadata(starter_line: str) -> dict: 
     """
     Use the LLM to propose a title, genre, tone, style, and theme keywords 
     based on the given starter line.
@@ -78,19 +78,19 @@ def generate_initial_story_metadata(starter_line: str) -> dict:
     "title", "genre", "tone", "style", "themeKeywords"
 
     Return a dict like:
-      {
+      {{
         "title": "...",
         "genre": "...",
         "tone": "...",
         "style": "...",
         "themeKeywords": ["keyword1", "keyword2", ...]
-      }
+      }}
     """
     raw_response = call_llm_api(prompt)
     data = parse_llm_json_response(raw_response)
     return data
 
-def add_new_line_and_update_by_id(story_id: str, new_line: str, added_by: str):
+def add_new_line_and_update_by_id(story_id: str, new_line: str, added_by: str): # New line is llmed or discord (need logic), we manage story id, added by is from discord
     """
     1) Retrieve the correct story from 'active_stories' by ID
     2) Call 'add_new_line_and_update' to handle LLM-based updates
@@ -280,13 +280,13 @@ def finalize_story(story_id: str) -> dict:
     "title", "genre", "tone", "style", "themeKeywords"
 
     Return a dict like:
-      {
+      {{
         "title": "...",
         "genre": "...",
         "tone": "...",
         "style": "...",
         "themeKeywords": ["keyword1", "keyword2", ...]
-      }
+      }}
     """
     raw_response = call_llm_api(prompt)
     data = parse_llm_json_response(raw_response)
@@ -299,7 +299,12 @@ def finalize_story(story_id: str) -> dict:
     story_data = active_stories.pop(story_id, None)
     return story_data
 
-
-#order:
-#create_story
-#add lines
+# Example use
+#create_story(1234, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
+#add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
+#print(active_stories[1234]["currentStoryText"])
+#x = input()
+#add_new_line_and_update_by_id(1234, x, "me")
+#complete_story = finalize_story(1234)
+#add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
+#print(complete_story["currentStoryText"])

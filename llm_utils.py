@@ -51,20 +51,11 @@ def generate_next_line_candidates_list(story_context: str, num_candidates=3, mod
 
     return content
 
-def accept_winning_line(story_id: int, chosen_line: int):
+def accept_winning_line(llm_output, chosen_line: int):
+    options = json.loads(llm_output)
     selected_option = options[chosen_line]["text"]
-    #.append_line_to_story(story_id, selected_option)
+    return selected_option
 
-Story = "Once upon a time there was a space cat who was very cute she loved to"
-
-llm_output = generate_next_line_candidates_list(Story)
-print(llm_output)
-
-options = json.loads(llm_output)
-selected_option = options[1]["text"]
-Story += " " + selected_option
-
-print(Story)
 
 ###########################################################
 ######################## Image Gen ########################
