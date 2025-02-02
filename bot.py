@@ -4,15 +4,27 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import os
-
-chat_history = []
+from liveStoryMem import *
+from llm_utils import *
+import json
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
-    
+
+class StoryId():
+    def __init__(self):
+        self.id = 0
+
+    def get(self):
+        self.id += 1
+        return self.id
+
+current_story_id = StoryId()
+poll_time = 10
+
 # can we have like !story user1 user2 user3
 
 # !start ___
@@ -37,39 +49,73 @@ async def story(ctx, lines: int = commands.parameter(
     default=5,
     description="The total number of lines in the story"
 )):
-    turn = 0
-    await ctx.send(f'Story time! Let\'s write {lines} lines together! You start!')
-    for _ in range(lines):
+    turn = 1
+    await ctx.send(f'Story time! Let\'s write {lines} lines together! You start:')
+    message = await bot.wait_for('message')
+    id = current_story_id.get()
+    create_story(id, message.content, 'desolate', message.author.name) # allow user to set 'personality'
+    print(f"Sent by {message.author.name}")
+    
+    for _ in range(lines - 1):
         if turn == 0: # user
-            await ctx.send(f'Give me a cool line:')
+            await ctx.send('Your turn! What comes next?')
             message = await bot.wait_for('message')
-            chat_history.append(message.content)
+            
+            add_new_line_and_update_by_id(id, message.content, message.author.name)
         else: # bot
-            messages = await send_reply()
+            reply = await generate_reply(id)
+            messages = json.loads(reply)
+            options = [m["text"] for m in messages]
+          
+            poll = await create_poll(ctx, f"What should happpen next? You have {poll_time} seconds to vote ... ", options[0:3]) 
+            await asyncio.sleep(poll_time)         
+            result = await get_poll_result(ctx, poll)
+            
+            await ctx.send(options[result])
 
-            p = discord.Poll(question="Which line should come next?", duration=timedelta(hours=1.0))
-            for message in messages:
-                p.add_answer(text=message)
-            p_message = await ctx.send(poll=p)
-            
-            await asyncio.sleep(20)
-            await p.end()
-            
-            updated_message = await ctx.channel.fetch_message(p_message.id)
-            poll_results = {answer.text: answer.vote_count for answer in updated_message.poll.answers}
-
-            max_votes = 0
-            poll_response = poll_results.keys()[0]
-            for answer, votes in poll_results.items():
-                if int(votes) > max_votes:
-                    max_votes = int(votes)
-                    poll_response = answer
-            
-            chat_history.append(poll_response)
-            await ctx.send(poll_response)
+            add_new_line_and_update_by_id(id, options[result], "bot")
+        
         turn = 1 - turn
         
-    await ctx.send(f'Received: {chat_history}')
+    await ctx.send(f'Received')
+
+# @bot.command()
+# async def test_poll(ctx):
+#     poll = await create_poll(ctx, "What is your favorite color?", ["Red", "Blue", "Green"])
+#     await asyncio.sleep(10)
+#     result = await get_poll_result(ctx, poll)
+#     await ctx.send(f"The poll result is: {result}")
+
+async def create_poll(ctx, question, options):
+    embed = discord.Embed(title="Poll", description=question, color=0x00ff00)
+    reactions = ['1️⃣', '2️⃣', '3️⃣']
+    
+    for i, option in enumerate(options):
+        embed.add_field(name=f'Option {i + 1}', value=option, inline=False)
+    
+    poll_message = await ctx.send(embed=embed)
+    
+    for i in range(len(options)):
+        await poll_message.add_reaction(reactions[i])
+    
+    return poll_message
+
+async def get_poll_result(ctx, poll_message):
+    poll_message = await ctx.channel.fetch_message(poll_message.id)
+    results = {reaction.emoji: reaction.count - 1 for reaction in poll_message.reactions}  # Subtract 1 to exclude the bot's own reaction
+    max_votes = 0
+    poll_response = ""
+    
+    for answer, votes in results.items():
+        if votes > max_votes:
+            max_votes = votes
+            poll_response = answer
+
+    if max_votes == 0:
+        poll_response = "No votes received, randomly picking an option."
+    
+    reactions = ['1️⃣', '2️⃣', '3️⃣']
+    return reactions.index(poll_response)
 
 @bot.command()
 async def story_user(ctx,
@@ -94,15 +140,19 @@ async def story_user(ctx,
             chat_history_2.append(message.content)
             userCount = (userCount + 1) % len(users)
         else: # bot
-            message = await send_reply()
+            message = await generate_reply()
             chat_history_2.append(message)
             await ctx.send('message')
         turn = 1 - turn
         
     await ctx.send(f'Received: {chat_history}')
-    
-async def send_reply():
-    return ['hi', 'there', 'hoang xdd']
+
+async def generate_reply(story_id: int):
+    return generate_next_line_candidates_list(
+        active_stories[story_id]['currentStoryText'],
+        active_stories[story_id]['storyMetadata']['promptPersonality'],
+    )
+        
 
 def main():
     load_dotenv()
