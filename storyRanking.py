@@ -5,7 +5,7 @@ def load_story_data(file_path):
         story_data = json.load(f)  # Load JSON data into a Python dictionary
     return story_data
 
-file_path = "Stories/EmbracingExhaustion.json"  # Path to your JSON file
+file_path = "Stories" + os.sep + "EmbracingExhaustion.json"  # Path to your JSON file
 story_data = load_story_data(file_path)
 
 

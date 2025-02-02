@@ -461,16 +461,17 @@ def finalize_story(story_id: str) -> dict:
 
     story_id = story_data["story_Id"]
 
-    ##final_image_url = generate_final_image(build_dalle_prompt(story_data)) ## Comment to save money
-    ##imgName = story_data["title"]## Comment to save money
-    ##story_id = story_data["story_Id"]
-    ##save_image(final_image_url, folder=f"Stories/{story_id}" filename=f"{imgName}.png") ## Comment to save money
+    final_image_url = generate_final_image(build_dalle_prompt(story_data)) ## Comment to save money
+    imgName = story_data["title"]## Comment to save money
+    story_id = story_data["story_Id"]
+    print("here")
+    save_image(final_image_url, folder=os.sep.join(["Stories", str(story_id)]), filename=f"{imgName}.png") ## Comment to save money
+    print("image saved")
+    save_story_data(story_data, folder=os.sep.join(["Stories", str(story_id)]))
 
-    save_story_data(story_data, folder=f"Stories/{story_id}")
+    images_to_video(os.sep.join(["Stories", str(story_id), "ConnectionsTimeline.mp4"]))
 
-    images_to_video(f"Stories/{story_id}/Graphs", f"Stories/{story_id}/ConnectionsTimeline.mp4")
-
-    return story_data
+    return story_data, final_image_url
 
 def save_story_data(story_data, folder="Stories"):
     title = story_data["title"]

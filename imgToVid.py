@@ -34,9 +34,3 @@ def images_to_video(image_folder, output_video, frame_rate=1, resolution=None):
     out.release()
     print(f"Video saved as {output_video}")
 
-image_folder = "path/to/images"  
-output_video = "output_video.mp4"
-frame_rate = 30 
-resolution = None #(1280, 720)  
-
-images_to_video(image_folder, output_video, frame_rate, resolution)
