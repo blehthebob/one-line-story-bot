@@ -4,8 +4,12 @@ from imgToVid import *
 import requests
 
 import networkx as nx
+import matplotlib
+matplotlib.use("Agg")  # Use a backend that doesn’t require Tkinter
 import matplotlib.pyplot as plt
+
 import numpy as np
+import os
 
 # A global or module-level dictionary for active stories (story_id -> story_data)
 active_stories = {}
@@ -17,7 +21,7 @@ def create_story(story_id: str, starter_line: str, personality: str, user_id: st
     3) Return the populated story data
     """
     story_data = {
-        "storyId": story_id,
+        "story_Id": story_id,
         "title": "",  # LLM to fill
         "currentStoryText": starter_line,
         "storyMetadata": {
@@ -167,8 +171,9 @@ def update_story_summary(story_data: dict, new_summary: str):
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
 
 def save_graph(story_id):
-    folder_path = f"Stories/{story_id}/Graphs"
+    folder_path = os.sep.join(["Stories", str(story_id), "Graphs"])
     os.makedirs(folder_path, exist_ok=True)
+    print(folder_path)
 
     existing_files = [f for f in os.listdir(folder_path) if f.endswith(".png")]
 
@@ -191,6 +196,8 @@ def create_graph(characters, story_id):
 
         # Add nodes and edges based on opinions
         for character in characters:
+            if character["opinionsOf"] is None:
+                continue
             for opinion in character["opinionsOf"]:
                 source = character["name"]
                 target = opinion["characterName"]
@@ -305,7 +312,7 @@ def add_new_line_and_update(story_data: dict, new_line: str, added_by: str):
     - "description"
     - "status"
     - "traits" (an array)
-    - (optionally) "opinionsOf" (an array of objects representing opinions about specific characters):
+    - "opinionsOf" (an array of objects representing opinions about specific characters):
         [
         {{
             "characterName": "...",

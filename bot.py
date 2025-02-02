@@ -120,7 +120,7 @@ async def finalise(ctx, id):
     candidates = json.loads(t)
     final = candidates[randint(0, len(candidates) - 1)]["text"]
     story = story_context + " " + final
-    image = generate_image(story)
+    image = generate_final_image(story)
     
     embed = discord.Embed(title= active_stories[id]["title"], description=story, color=discord.Color.blue())
     embed.set_image(url=image)
