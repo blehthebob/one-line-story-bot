@@ -88,10 +88,8 @@ def generate_initial_story_metadata(starter_line: str) -> dict:
       }}
     """
     raw_response = call_llm_api(prompt)
-    print(raw_response)
     data = parse_llm_json_response(raw_response)
 
-    print(data)
     return data
 
 def add_new_line_and_update_by_id(story_id: str, new_line: str, added_by: str): # New line is llmed or discord (need logic), we manage story id, added by is from discord
@@ -130,14 +128,12 @@ def set_story_metadata(story_data: dict, extracted_data: dict):
     Given the story data and a metadata dict from generate_initial_story_metadata,
     set the relevant fields in the JSON structure.
     """
-    print(extracted_data)
     story_data["title"] = extracted_data.get("title", "")
     story_data["storyMetadata"]["genre"] = extracted_data.get("genre", "")
     story_data["storyMetadata"]["tone"] = extracted_data.get("tone", "")
     story_data["storyMetadata"]["style"] = extracted_data.get("style", "")
     story_data["storyMetadata"]["themeKeywords"] = extracted_data.get("themeKeywords", [])
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
-    print(story_data["title"])
 
 
 
@@ -334,7 +330,6 @@ def finalize_story(story_id: str) -> dict:
     """
     raw_response = call_llm_api(prompt)
     data = parse_llm_json_response(raw_response)
-    print(data)
 
     set_story_metadata(story_data, data)
 
