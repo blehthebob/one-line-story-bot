@@ -39,6 +39,7 @@ def generate_next_line_candidates_list(story_context: str, num_candidates=3, mod
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
+            {"role": "system", "content": "Only ever return english ASCII characters."},
             {"role": "user", "content": user_prompt}
         ],
         temperature=1.5,
@@ -78,7 +79,8 @@ def generate_final_line_candidates_list(story_context: str, num_candidates=3, mo
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "system", "content": "Only ever return english ASCII characters."},
+            {"role": "user", "content": user_prompt},
         ],
         temperature=0.8,
         max_tokens=300

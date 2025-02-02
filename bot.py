@@ -32,7 +32,7 @@ class StoryId():
         return self.id
 
 current_story_id = StoryId()
-poll_time = 10
+poll_time = 30
 
 personality = None
 default_personality_options = ["sad", "funny", "mysterious", "action-packed", "fantasy/sci-fi"]
@@ -54,6 +54,7 @@ async def story(ctx, lines: int = commands.parameter(
     primed = True
     personality = None
     users = set()
+    await ctx.send(f"Story of length {length} lines initiated. Use !join to take part and !start to begin writing.")
    
 @bot.command(brief="Register as a writer for the story")
 async def join(ctx):
@@ -71,34 +72,39 @@ async def start(ctx):
     if not primed:
         return
     global personality
+    channel = ctx.channel
+    def check(msg):
+        return msg.author in users and msg.channel == channel
     turn = 1
     await ctx.send(f'Story time! Let\'s write {length} lines together! You start:')
-    message = await bot.wait_for('message')
+    message = await bot.wait_for('message', check=check)
     id = current_story_id.get()
     if personality is None:
         # Randomly select out of a list
         personality = choice(default_personality_options)
-        
+    
     create_story(id, message.content, personality, message.author.name)
     print(f"Sent by {message.author.name}")
     
     for _ in range(length - 1):
         if turn == 0: # user
             await ctx.send('Your turn! What comes next?')
-            message = await bot.wait_for('message')
+            message = await bot.wait_for('message', check=lambda m: m.author in users)
             
             if message.author.name in users:
                 add_new_line_and_update_by_id(id, message.content, message.author.name)
         else: # bot
             reply = await generate_reply(id)
+            print(reply)
             messages = json.loads(reply)
             options = [m["text"] for m in messages]
           
-            poll = await create_poll(ctx, f"What should happpen next? You have {poll_time} seconds to vote ... ", options[0:3]) 
+            poll = await create_poll(ctx, f"You have {poll_time} seconds to vote ... ", options[0:3]) 
             await asyncio.sleep(poll_time)         
             result = await get_poll_result(ctx, poll)
             
-            await ctx.send(options[result])
+            embed = discord.Embed(description=options[result], color=discord.Color.blue())
+            await ctx.send(embed=embed)
 
             add_new_line_and_update_by_id(id, options[result], "bot")
         
@@ -113,15 +119,18 @@ async def finalise(ctx, id):
     t = generate_final_line_candidates_list(story_context)
     candidates = json.loads(t)
     final = candidates[randint(0, len(candidates) - 1)]["text"]
-    await ctx.send("Here is the story we wrote in full:")
-    story = story_context.split(". ") + [final]
-    for l in story:
-        await ctx.send(l + ".")
+    story = story_context + " " + final
+    image = generate_image(story)
+    
+    embed = discord.Embed(title= active_stories[id]["title"], description=story, color=discord.Color.blue())
+    embed.set_image(url=image)
+    
+    await ctx.send(embed=embed)
     
     
 
 async def create_poll(ctx, question, options):
-    embed = discord.Embed(title="Poll", description=question, color=0x00ff00)
+    embed = discord.Embed(title=f"What happens next? {question}", color=0x00ff00)
     reactions = ['1️⃣', '2️⃣', '3️⃣']
     
     for i, option in enumerate(options):
@@ -146,7 +155,7 @@ async def get_poll_result(ctx, poll_message):
             poll_response = answer
 
     if max_votes == 0:
-        return randint(1, 3)
+        return randint(0, 2)
     
     reactions = ['1️⃣', '2️⃣', '3️⃣']
     return reactions.index(poll_response)

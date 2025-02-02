@@ -267,7 +267,7 @@ def add_new_line_and_update(story_data: dict, new_line: str, added_by: str):
     story_data["lines"].append(line_entry)
 
     # Also update the overall text
-    story_data["currentStoryText"] += " " + new_line
+    story_data["currentStoryText"] += " " + new_line.rstrip() + ("." if new_line[-1] != "." else "")
 
     # 2. LLM prompt to extract new characters/settings from the latest line
     prompt_extract = f"""
@@ -431,13 +431,13 @@ def finalize_story(story_id: str) -> dict:
     return story_data
 
 # Example use
-story_id = 1234
-create_story(story_id, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
-add_new_line_and_update_by_id(story_id, accept_winning_line(generate_next_line_candidates_list(active_stories[story_id]["currentStoryText"],personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0), "llm")
-print(active_stories[story_id]["currentStoryText"])
-x = input()
-add_new_line_and_update_by_id(story_id, x, "me")
-add_new_line_and_update_by_id(story_id, accept_winning_line(generate_final_line_candidates_list(active_stories[story_id]["currentStoryText"], personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0 ), "llm")
-complete_story = finalize_story(story_id)
-print(complete_story["currentStoryText"])
-print(complete_story)
+# story_id = 1234
+# create_story(story_id, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
+# add_new_line_and_update_by_id(story_id, accept_winning_line(generate_next_line_candidates_list(active_stories[story_id]["currentStoryText"],personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0), "llm")
+# print(active_stories[story_id]["currentStoryText"])
+# x = input()
+# add_new_line_and_update_by_id(story_id, x, "me")
+# add_new_line_and_update_by_id(story_id, accept_winning_line(generate_final_line_candidates_list(active_stories[story_id]["currentStoryText"], personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0 ), "llm")
+# complete_story = finalize_story(story_id)
+# print(complete_story["currentStoryText"])
+# print(complete_story)
