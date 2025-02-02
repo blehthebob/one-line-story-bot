@@ -7,7 +7,7 @@ import os
 from liveStoryMem import *
 from llm_utils import *
 import json
-from random import randint
+from random import randint, choice
 
 """ 
     TODO:
@@ -34,43 +34,61 @@ class StoryId():
 current_story_id = StoryId()
 poll_time = 10
 
-# can we have like !story user1 user2 user3
-
-# !start ___
-# receive a cmd(line_limit)
-# begin listening for story
-# receive 1 line of story
-# feed to ai
-# get ai return
-# make poll
-# edit poll? into poll winner
-# rand select user for next line
-# repeat until line limit
-# gen ending
-# with image
+personality = None
+default_personality_options = ["sad", "funny", "mysterious", "action-packed", "fantasy/sci-fi"]
+users = set()
+length = 0
+primed = False
 
 @bot.event
 async def on_ready():
     print(f'Logged in as: {bot.user}')
         
-@bot.command()
+@bot.command(brief="Start a new story with a given number of lines")
 async def story(ctx, lines: int = commands.parameter(
     default=5,
     description="The total number of lines in the story"
 )):
+    global length, primed, personality, users
+    length = lines
+    primed = True
+    personality = None
+    users = set()
+   
+@bot.command(brief="Register as a writer for the story")
+async def join(ctx):
+    users.add(ctx.author)
+    await ctx.send(f'{ctx.author.name} has joined the story!')
+
+@bot.command(brief="Set the tone of the story e.g. sad, funny, ...")
+async def personality(ctx, p: str):
+    global personality
+    personality = p
+    await ctx.send(f"Personality: {personality}")
+ 
+@bot.command(brief="Begin writing the story")
+async def start(ctx):
+    if not primed:
+        return
+    global personality
     turn = 1
-    await ctx.send(f'Story time! Let\'s write {lines} lines together! You start:')
+    await ctx.send(f'Story time! Let\'s write {length} lines together! You start:')
     message = await bot.wait_for('message')
     id = current_story_id.get()
-    create_story(id, message.content, 'desolate', message.author.name) # allow user to set 'personality'
+    if personality is None:
+        # Randomly select out of a list
+        personality = choice(default_personality_options)
+        
+    create_story(id, message.content, personality, message.author.name)
     print(f"Sent by {message.author.name}")
     
-    for _ in range(lines - 1):
+    for _ in range(length - 1):
         if turn == 0: # user
             await ctx.send('Your turn! What comes next?')
             message = await bot.wait_for('message')
             
-            add_new_line_and_update_by_id(id, message.content, message.author.name)
+            if message.author.name in users:
+                add_new_line_and_update_by_id(id, message.content, message.author.name)
         else: # bot
             reply = await generate_reply(id)
             messages = json.loads(reply)
@@ -92,18 +110,15 @@ async def story(ctx, lines: int = commands.parameter(
     
 async def finalise(ctx, id):
     story_context = active_stories[id]["currentStoryText"]
-    candidates = json.loads(generate_final_line_candidates_list(story_context))
-    print(candidates)
-    await ctx.send(candidates[randint(0, len(candidates) - 1)]["text"])
+    t = generate_final_line_candidates_list(story_context)
+    candidates = json.loads(t)
+    final = candidates[randint(0, len(candidates) - 1)]["text"]
+    await ctx.send("Here is the story we wrote in full:")
+    story = story_context.split(". ") + [final]
+    for l in story:
+        await ctx.send(l + ".")
     
     
-
-# @bot.command()
-# async def test_poll(ctx):
-#     poll = await create_poll(ctx, "What is your favorite color?", ["Red", "Blue", "Green"])
-#     await asyncio.sleep(10)
-#     result = await get_poll_result(ctx, poll)
-#     await ctx.send(f"The poll result is: {result}")
 
 async def create_poll(ctx, question, options):
     embed = discord.Embed(title="Poll", description=question, color=0x00ff00)
@@ -131,40 +146,40 @@ async def get_poll_result(ctx, poll_message):
             poll_response = answer
 
     if max_votes == 0:
-        poll_response = randint(0, 2)
+        return randint(1, 3)
     
     reactions = ['1️⃣', '2️⃣', '3️⃣']
     return reactions.index(poll_response)
 
-@bot.command()
-async def story_user(ctx,
-                     users: commands.Greedy[discord.User] = commands.parameter(
-                         description="The users participating in the story",
-                         default = []),
-                     lines: int = commands.parameter(
-                         default=5,
-                         description="The total number of lines in the story"
-                         )):
-    chat_history_2 = []
-    turn = 0
-    userCount = 0
-    if len(users) == 0:
-        users = [ctx.author]
+# @bot.command()
+# async def story_user(ctx,
+#                      users: commands.Greedy[discord.User] = commands.parameter(
+#                          description="The users participating in the story",
+#                          default = []),
+#                      lines: int = commands.parameter(
+#                          default=5,
+#                          description="The total number of lines in the story"
+#                          )):
+#     chat_history_2 = []
+#     turn = 0
+#     userCount = 0
+#     if len(users) == 0:
+#         users = [ctx.author]
 
-    await ctx.send(f'Story time! Let\'s write {lines} lines together! You start:')
+#     await ctx.send(f'Story time! Let\'s write {lines} lines together! You start:')
 
-    for _ in range(lines):
-        if turn == 0: # user
-            message = await bot.wait_for('message', check=lambda m: m.author == users[userCount])
-            chat_history_2.append(message.content)
-            userCount = (userCount + 1) % len(users)
-        else: # bot
-            message = await generate_reply()
-            chat_history_2.append(message)
-            await ctx.send('message')
-        turn = 1 - turn
+#     for _ in range(lines):
+#         if turn == 0: # user
+#             message = await bot.wait_for('message', check=lambda m: m.author == users[userCount])
+#             chat_history_2.append(message.content)
+#             userCount = (userCount + 1) % len(users)
+#         else: # bot
+#             message = await generate_reply()
+#             chat_history_2.append(message)
+#             await ctx.send('message')
+#         turn = 1 - turn
         
-    await ctx.send(f'Received: {chat_history}')
+#     await ctx.send(f'Received: {chat_history}')
 
 async def generate_reply(story_id: int):
     return generate_next_line_candidates_list(
