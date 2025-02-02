@@ -2,15 +2,13 @@ import cv2
 import os
 import glob
 
-def images_to_video(image_folder, output_video, frame_rate=30, resolution=None):
-    # Get all image files in the folder (supports common formats)
+def images_to_video(image_folder, output_video, frame_rate=1, resolution=None):
     image_files = sorted(glob.glob(os.path.join(image_folder, "*.*")), key=os.path.getmtime)
     
     if not image_files:
         print("No images found in the folder!")
         return
     
-    # Read the first image to determine video resolution
     first_image = cv2.imread(image_files[0])
     
     if resolution:
@@ -29,19 +27,16 @@ def images_to_video(image_folder, output_video, frame_rate=30, resolution=None):
             print(f"Skipping invalid image: {img_file}")
             continue
         
-        # Resize image if needed
         img = cv2.resize(img, (width, height))
         
-        # Write frame to video
         out.write(img)
     
     out.release()
     print(f"Video saved as {output_video}")
 
-# Example usage
-image_folder = "path/to/images"  # Change this to your folder
+image_folder = "path/to/images"  
 output_video = "output_video.mp4"
-frame_rate = 30  # Adjust as needed
-resolution = (1280, 720)  # Set resolution (optional), or leave None for auto
+frame_rate = 30 
+resolution = None #(1280, 720)  
 
 images_to_video(image_folder, output_video, frame_rate, resolution)

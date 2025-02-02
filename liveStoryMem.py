@@ -1,10 +1,12 @@
 from datetime import datetime
 from llm_utils import *
+from imgToVid import *
 import requests
 
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+
 # A global or module-level dictionary for active stories (story_id -> story_data)
 active_stories = {}
 
@@ -164,8 +166,21 @@ def update_story_summary(story_data: dict, new_summary: str):
     story_data["storySummary"] = new_summary
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
 
+def save_graph(story_id):
+    folder_path = f"Stories/{story_id}/Graphs"
+    os.makedirs(folder_path, exist_ok=True)
+
+    existing_files = [f for f in os.listdir(folder_path) if f.endswith(".png")]
+
+    next_number = len(existing_files) + 1
+    file_name = f"graph_{next_number}.png"
+    file_path = os.path.join(folder_path, file_name)
+
+    plt.savefig(file_path, format="png", dpi=300)
+    #print(f"Graph saved as: {file_path}")
+
 #function to create graph
-def creategraph(characters):
+def create_graph(characters, story_id):
     print(len(characters))
     if len(characters)>0:
         # Create a MultiDiGraph (allows multiple edges)
@@ -249,10 +264,13 @@ def creategraph(characters):
             # Draw the edge labels (opinion text and trust level) without modifying node positions
             nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v, key): label}, font_size=8, verticalalignment="center", horizontalalignment="center", label_pos=0.5,connectionstyle=f"arc3,rad={0.1 * offset}")
 
+
         # Title and show the plot
         plt.title("Character Relationships Graph")
         plt.axis('off')  # Hide the axes for better visualization
-        plt.show()
+
+        save_graph(story_id)
+
 
 def add_new_line_and_update(story_data: dict, new_line: str, added_by: str):
     """
@@ -365,7 +383,8 @@ def add_characters(story_data: dict, characters: list):
             existing_characters.append(new_char)
 
     story_data["characters"] = existing_characters
-    creategraph(existing_characters)
+    story_id = story_data["story_Id"]
+    create_graph(existing_characters, story_id)
 
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
 
@@ -433,11 +452,16 @@ def finalize_story(story_id: str) -> dict:
 
     story_data = active_stories.pop(story_id, None)
 
+    story_id = story_data["story_Id"]
+
     ##final_image_url = generate_final_image(build_dalle_prompt(story_data)) ## Comment to save money
     ##imgName = story_data["title"]## Comment to save money
-    ##save_image(final_image_url, filename=f"{imgName}.png") ## Comment to save money
+    ##story_id = story_data["story_Id"]
+    ##save_image(final_image_url, folder=f"Stories/{story_id}" filename=f"{imgName}.png") ## Comment to save money
 
-    save_story_data(story_data)
+    save_story_data(story_data, folder=f"Stories/{story_id}")
+
+    images_to_video(f"Stories/{story_id}/Graphs", f"Stories/{story_id}/ConnectionsTimeline.mp4")
 
     return story_data
 
