@@ -40,6 +40,7 @@ def create_story(story_id: str, starter_line: str, personality: str, user_id: st
     }
 
     initial_meta = generate_initial_story_metadata(starter_line)
+    print(initial_meta)
     set_story_metadata(story_data, initial_meta)
 
     story_text = starter_line
@@ -87,7 +88,10 @@ def generate_initial_story_metadata(starter_line: str) -> dict:
       }}
     """
     raw_response = call_llm_api(prompt)
+    print(raw_response)
     data = parse_llm_json_response(raw_response)
+
+    print(data)
     return data
 
 def add_new_line_and_update_by_id(story_id: str, new_line: str, added_by: str): # New line is llmed or discord (need logic), we manage story id, added by is from discord
@@ -121,18 +125,21 @@ def parse_llm_json_response(llm_response_text: str) -> dict:
         return {}
 
 
-def set_story_metadata(story_data: dict, metadata: dict):
+def set_story_metadata(story_data: dict, extracted_data: dict):
     """
     Given the story data and a metadata dict from generate_initial_story_metadata,
     set the relevant fields in the JSON structure.
     """
-    story_data["title"] = metadata.get("title", "")
-    story_data["storyMetadata"]["genre"] = metadata.get("genre", "")
-    story_data["storyMetadata"]["tone"] = metadata.get("tone", "")
-    story_data["storyMetadata"]["style"] = metadata.get("style", "")
-    story_data["storyMetadata"]["themeKeywords"] = metadata.get("themeKeywords", [])
-
+    print(extracted_data)
+    story_data["title"] = extracted_data.get("title", "")
+    story_data["storyMetadata"]["genre"] = extracted_data.get("genre", "")
+    story_data["storyMetadata"]["tone"] = extracted_data.get("tone", "")
+    story_data["storyMetadata"]["style"] = extracted_data.get("style", "")
+    story_data["storyMetadata"]["themeKeywords"] = extracted_data.get("themeKeywords", [])
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
+    print(story_data["title"])
+
+
 
 def generate_story_summary(full_story_text: str) -> str:
     """
@@ -327,6 +334,7 @@ def finalize_story(story_id: str) -> dict:
     """
     raw_response = call_llm_api(prompt)
     data = parse_llm_json_response(raw_response)
+    print(data)
 
     set_story_metadata(story_data, data)
 
