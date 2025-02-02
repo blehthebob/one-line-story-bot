@@ -2,6 +2,7 @@ from datetime import datetime
 from llm_utils import *
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy as np
 # A global or module-level dictionary for active stories (story_id -> story_data)
 active_stories = {}
 
@@ -163,6 +164,7 @@ def update_story_summary(story_data: dict, new_summary: str):
 
 #function to create graph
 def creategraph(characters):
+    print(len(characters))
     if len(characters)>0:
         # Create a MultiDiGraph (allows multiple edges)
         G = nx.MultiDiGraph()
@@ -361,7 +363,7 @@ def add_characters(story_data: dict, characters: list):
             existing_characters.append(new_char)
 
     story_data["characters"] = existing_characters
-    # creategraph(existing_characters)
+    creategraph(existing_characters)
 
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
 
