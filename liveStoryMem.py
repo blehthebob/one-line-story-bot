@@ -1,5 +1,7 @@
 from datetime import datetime
 from llm_utils import *
+import requests
+
 # A global or module-level dictionary for active stories (story_id -> story_data)
 active_stories = {}
 
@@ -337,6 +339,10 @@ def finalize_story(story_id: str) -> dict:
 
     story_data = active_stories.pop(story_id, None)
 
+    ##final_image_url = generate_final_image(build_dalle_prompt(story_data)) ## Comment to save money
+    ##imgName = story_data["title"]## Comment to save money
+    ##save_image(final_image_url, filename=f"{imgName}.png") ## Comment to save money
+
     save_story_data(story_data)
 
     return story_data
@@ -355,6 +361,78 @@ def save_story_data(story_data, folder="Stories"):
 
     return story_data
 
+def save_image(image_url, folder="Stories", filename="generated_image.png"):
+    image_data = requests.get(image_url).content
+    os.makedirs(folder, exist_ok=True)
+
+    file_path = os.path.join(folder, filename)
+    # Write the content to a file
+    with open(file_path, "wb") as file:
+        file.write(image_data)
+    print(f"Saved image to {filename}")
+
+def build_dalle_prompt(story_data: dict) -> str:
+    metadata = story_data["storyMetadata"]
+    title = story_data["title"]
+    genre = metadata.get("genre", "")
+    tone = metadata.get("tone", "")
+    style = metadata.get("style", "")
+    keywords = ", ".join(metadata.get("themeKeywords", []))
+    
+    # Summarize characters
+    character_summaries = []
+    for char in story_data.get("characters", []):
+        name = char.get("name", "Unknown Character")
+        traits = ", ".join(char.get("traits", []))
+        desc = f"{name} ({traits})" if traits else name
+        character_summaries.append(desc)
+    characters_str = "\n- " + "\n- ".join(character_summaries) if character_summaries else "None"
+    
+    # Summarize settings
+    setting_summaries = []
+    for setting in story_data.get("settings", []):
+        location = setting.get("locationName", "Unknown Location")
+        set_desc = setting.get("description", "")
+        setting_summaries.append(f"{location}: {set_desc}")
+    settings_str = "\n".join(setting_summaries) if setting_summaries else "No specific setting"
+
+    # Possibly a truncated or summarized version of the story text
+    story_desc = story_data.get("storySummary", "") 
+    
+    prompt = f"""
+Create an illustration inspired by the following story and its metadata:
+
+Title: {title}
+Genre: {genre}
+Tone: {tone}
+Art Style: {style}
+Theme Keywords: {keywords}
+
+Story Description:
+"{story_desc}"
+
+Key Characters:{characters_str}
+
+Setting:
+{settings_str}
+
+Art Direction:
+- Reflect the story’s {genre} genre and maintain a {tone} atmosphere.
+- Incorporate visual elements that hint at {keywords}, ensuring a cohesive look.
+- Depict the characters and setting in a scene representing the central conflict or theme.
+- Aim for a {style} style (or related visual approach).
+- Emphasize the emotional essence that fits the story's tone and theme.
+
+Color Palette & Composition:
+- Suggest a palette that conveys {tone} vibe.
+- Composition can be cinematic, minimalist, or surreal as needed.
+
+Please produce a image with enough detail to capture the story’s essence and characters in a single, cohesive scene.
+"""
+    return prompt.strip()
+
+
+    
 # Example use
 #story_id = 1234
 #create_story(story_id, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
