@@ -1,22 +1,15 @@
 import os
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 import re
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(
+    api_key = os.environ.get("OPENAI_API_KEY")
+)
 
-def generate_text(prompt: str, model="gpt-4o-mini") -> str:
-    """Generate a single completion from ChatGPT."""
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=100,
-        temperature=0.7
-    )
-    return response['choices'][0]['message']['content']
 
-def generate_next_line_candidates_list(story_context: str, num_candidates=3, model="gpt-3.5-turbo") -> list:
+def generate_next_line_candidates_list(story_context: str, num_candidates=3, model="gpt-4o-mini") -> list:
     system_prompt = (
         "You are a creative writing assistant. "
         "I will provide a story so far, and you will generate a numbered list of possible next lines."
@@ -29,7 +22,7 @@ def generate_next_line_candidates_list(story_context: str, num_candidates=3, mod
         f"1) ...\n2) ...\n3) ..."
     )
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
@@ -39,11 +32,13 @@ def generate_next_line_candidates_list(story_context: str, num_candidates=3, mod
         max_tokens=150
     )
 
-    content = response['choices'][0]['message']['content']
+    choices = response.choices
+    chat_completion = choices[0]
+    content = chat_completion.message.content
 
-    candidates = parse_candidates_from_list(content, num_candidates)
-
-    return candidates
+    # candidates = parse_candidates_from_list(content, num_candidates)
+    print(content)
+    return content
 
 def parse_candidates_from_list(response_text: str, num_candidates: int) -> list:
 
@@ -55,3 +50,5 @@ def parse_candidates_from_list(response_text: str, num_candidates: int) -> list:
 
     matches = [m.strip() for m in matches if m.strip()]
     return matches
+Story = "Once upon a time there was a space cat who was very cute she loved to"
+generate_next_line_candidates_list(Story)

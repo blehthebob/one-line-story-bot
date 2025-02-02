@@ -11,27 +11,29 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 # print(f"OpenAI API Key: {openai_api_key}")
 
-response = client.images.generate(
-    model="dall-e-3",
-    prompt="a white siamese cat",
-    size="1024x1024",
-    quality="standard",
-    n=1,
-)
+# response = client.images.generate(
+#     model="dall-e-3",
+#     prompt="a white siamese cat",
+#     size="1024x1024",
+#     quality="standard",
+#     n=1,
+# )
 
-print(response.data[0].url)
+# print(response.data[0].url)
 
-# def generate_image(prompt):
-#     response = openai.Image.create(
-#         prompt=prompt,
-#         n=1,
-#         size="512x512"
-#         quality = "standard",
-#     )
-#     image_url = response['data'][0]['url']
-#     return image_url
+def generate_image(prompt):
+    response =client.images.generate(
+        model ="dall-e-3",
+        prompt=prompt,
+        n=1,
+        size="1024x1024",
+        quality = "standard",
+    )
+    image_url = response.data[0].url
+    print(image_url)
+    return image_url
 
-#generate_image("lunar new year")
+generate_image("lunar new year")
 # @bot.command()
 # async def generate_image(ctx, *, prompt: str):
 #     try:
