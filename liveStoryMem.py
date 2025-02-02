@@ -40,7 +40,6 @@ def create_story(story_id: str, starter_line: str, personality: str, user_id: st
     }
 
     initial_meta = generate_initial_story_metadata(starter_line)
-    print(initial_meta)
     set_story_metadata(story_data, initial_meta)
 
     story_text = starter_line
@@ -340,12 +339,13 @@ def finalize_story(story_id: str) -> dict:
     return story_data
 
 # Example use
-#create_story(1234, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
-#add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
-#print(active_stories[1234]["currentStoryText"])
+#story_id = 1234
+#create_story(story_id, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
+#add_new_line_and_update_by_id(story_id, accept_winning_line(generate_next_line_candidates_list(active_stories[story_id]["currentStoryText"],personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0), "llm")
+#print(active_stories[story_id]["currentStoryText"])
 #x = input()
-#add_new_line_and_update_by_id(1234, x, "me")
-#add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
-#complete_story = finalize_story(1234)
+#add_new_line_and_update_by_id(story_id, x, "me")
+#add_new_line_and_update_by_id(story_id, accept_winning_line(generate_final_line_candidates_list(active_stories[story_id]["currentStoryText"], personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0 ), "llm")
+#complete_story = finalize_story(story_id)
 #print(complete_story["currentStoryText"])
 #print(complete_story)
