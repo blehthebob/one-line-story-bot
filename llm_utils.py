@@ -98,7 +98,7 @@ def generate_image(prompt):
 
 def call_llm_api(request: str, model="gpt-4o-mini") -> list:
 
-    system_prompt = "You are responsible for populating metadata of a json structure"
+    system_prompt = "You are responsible for populating metadata of a json structure, You are an assistant that returns only valid JSON, with no code fences, no triple backticks, and no additional commentary. Respond with exactly the JSON object described, nothing more."
 
 
     user_prompt = request
