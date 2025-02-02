@@ -93,14 +93,13 @@ for character in characters:
                     G.add_edge(target, source, label=reverse_edge_label)
 
 # Draw the graph with a slight offset for separation
-pos = nx.spring_layout(G, seed=42)  # Positioning for the nodes
-adjusted_pos = pos.copy()  # Create a copy of the positions to adjust edge labels only
+pos = nx.spring_layout(G, seed=42) 
 
 # Create a figure and axis for drawing
 plt.figure(figsize=(10, 6))
-
+node_size = 2000
 # Draw nodes
-nx.draw_networkx_nodes(G, pos, node_color='skyblue', node_size=2000)
+nx.draw_networkx_nodes(G, pos, node_color='skyblue', node_size=node_size)
 nx.draw_networkx_labels(G, pos, font_size=10, font_weight='bold')
 
 # Draw the edges and adjust positions for each edge
@@ -110,7 +109,7 @@ for u, v, key in G.edges(keys=True):
 
     # Initialize the offset for this edge if not already set
     if (u, v) not in edge_offsets:
-        edge_offsets[(u, v)] = 3  # Set the initial offset to 3
+        edge_offsets[(u, v)] = 0.9  # Set the initial offset to 3
 
     # Increment the offset for subsequent edges between the same pair of nodes
     else:
@@ -122,31 +121,27 @@ for u, v, key in G.edges(keys=True):
     pos_v = np.array(pos[v])
     
     edge_vector = pos_v - pos_u
-    edge_vector /= np.linalg.norm(edge_vector)  # Normalize
+    edge_vector /= np.linalg.norm(edge_vector) 
     edge_vector *= offset
 
-    adjusted_pos_u = pos_u + 0.1
-    adjusted_pos_v = pos_v + 0.1
-    adjusted_pos[u] = adjusted_pos_u
-    adjusted_pos[v] = adjusted_pos_v
     # Draw the edges with the adjusted positions
-    nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=2, alpha=0.7, edge_color='gray', arrows=True, connectionstyle=f"arc3,rad={0.1 * offset}")
+    nx.draw_networkx_edges(G, pos, node_size = node_size, edgelist=[(u, v)], width=1, alpha=0.7, edge_color='gray', arrows=True, arrowsize = 25, connectionstyle=f"arc3,rad={0.1 * offset}")
 
     # Calculate and place the edge labels slightly offset from the edge path
-    midpoint = (np.array(pos_u) + np.array(pos_v)) / 2  # Use the original node positions
+    midpoint = (np.array(pos_u) + np.array(pos_v)) / 2  
 
     # Apply different offsets based on the edge direction
     if (u, v) in G.edges():
-        label_offset = 0.05  # Forward edge label offset
+        label_offset = 0.05  
     else:
-        label_offset = -0.05  # Reverse edge label offset
+        label_offset = -0.05  
 
     label_position = midpoint + np.array([label_offset, label_offset])
 
     # Draw the edge labels (opinion text and trust level) without modifying node positions
-    nx.draw_networkx_edge_labels(G, adjusted_pos, edge_labels={(u, v, key): label}, font_size=8, verticalalignment="center", horizontalalignment="center", label_pos=0.5)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v, key): label}, font_size=8, verticalalignment="center", horizontalalignment="center", label_pos=0.5,connectionstyle=f"arc3,rad={0.1 * offset}")
 
 # Title and show the plot
-plt.title("Character Relationships Graph (Multigraph with Separated Arrows and Edge Labels)")
+plt.title("Character Relationships Graph")
 plt.axis('off')  # Hide the axes for better visualization
 plt.show()
