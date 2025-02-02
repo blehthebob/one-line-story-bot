@@ -336,6 +336,23 @@ def finalize_story(story_id: str) -> dict:
     update_story_summary(story_data, story_summary)
 
     story_data = active_stories.pop(story_id, None)
+
+    save_story_data(story_data)
+
+    return story_data
+
+def save_story_data(story_data, folder="Stories"):
+    title = story_data["title"]
+    filename=f"{title}.json"
+    os.makedirs(folder, exist_ok=True)
+
+    file_path = os.path.join(folder, filename)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(story_data, f, indent=4) 
+
+    print(f"Story data saved to {file_path}")
+
     return story_data
 
 # Example use
