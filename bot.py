@@ -7,6 +7,15 @@ import os
 from liveStoryMem import *
 from llm_utils import *
 import json
+from random import randint
+
+""" 
+    TODO:
+    - !create, !personality, !join to join the story, !start to begin writing
+    - Randomly select eligible user for next line
+    - Finalise story
+    - Print out final story (@user1: line1, @bot: line 2, etc)
+"""
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -76,8 +85,18 @@ async def story(ctx, lines: int = commands.parameter(
             add_new_line_and_update_by_id(id, options[result], "bot")
         
         turn = 1 - turn
-        
-    await ctx.send(f'Received')
+    
+    # finalise story
+    await finalise(ctx, id)
+    await ctx.send(f'The end!')
+    
+async def finalise(ctx, id):
+    story_context = active_stories[id]["currentStoryText"]
+    candidates = json.loads(generate_final_line_candidates_list(story_context))
+    print(candidates)
+    await ctx.send(candidates[randint(0, len(candidates) - 1)]["text"])
+    
+    
 
 # @bot.command()
 # async def test_poll(ctx):
@@ -112,7 +131,7 @@ async def get_poll_result(ctx, poll_message):
             poll_response = answer
 
     if max_votes == 0:
-        poll_response = "No votes received, randomly picking an option."
+        poll_response = randint(0, 2)
     
     reactions = ['1️⃣', '2️⃣', '3️⃣']
     return reactions.index(poll_response)
