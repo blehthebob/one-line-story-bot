@@ -91,8 +91,7 @@ async def start(ctx):
             await ctx.send('Your turn! What comes next?')
             message = await bot.wait_for('message', check=lambda m: m.author in users)
             
-            if message.author.name in users:
-                add_new_line_and_update_by_id(id, message.content, message.author.name)
+            add_new_line_and_update_by_id(id, message.content, message.author.name)
         else: # bot
             reply = await generate_reply(id)
             print(reply)

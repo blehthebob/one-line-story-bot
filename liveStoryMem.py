@@ -296,7 +296,7 @@ def add_new_line_and_update(story_data: dict, new_line: str, added_by: str):
     story_data["lines"].append(line_entry)
 
     # Also update the overall text
-    story_data["currentStoryText"] += " " + new_line.rstrip() + ("." if new_line[-1] != "." else "")
+    story_data["currentStoryText"] += " " + new_line + ("." if new_line[-1] != "." else "")
 
     # 2. LLM prompt to extract new characters/settings from the latest line
     prompt_extract = f"""
