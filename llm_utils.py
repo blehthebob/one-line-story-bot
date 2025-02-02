@@ -52,3 +52,34 @@ def parse_candidates_from_list(response_text: str, num_candidates: int) -> list:
     return matches
 Story = "Once upon a time there was a space cat who was very cute she loved to"
 generate_next_line_candidates_list(Story)
+
+
+def generate_image(prompt):
+    response =client.images.generate(
+        model ="dall-e-3",
+        prompt=prompt,
+        n=1,
+        size="1024x1024",
+        quality = "standard",
+    )
+    image_url = response.data[0].url
+    print(image_url)
+    return image_url
+
+generate_image("lunar new year")
+# @bot.command()
+# async def generate_image(ctx, *, prompt: str):
+#     try:
+#         # Call OpenAI's DALL·E API
+#         response = openai.Image.create(
+#             prompt=prompt,
+#             n=1,
+#             size="512x512"
+#         )
+#         # Get the image URL from the response
+#         image_url = response['data'][0]['url']
+
+#         # Send the generated image to Discord
+#         await ctx.send(image_url)
+#     except Exception as e:
+#         await ctx.send(f"Error generating image: {e}")
