@@ -423,7 +423,7 @@ def add_settings(story_data: dict, settings: list):
 def get_story(story_id: str):
     return active_stories.get(story_id)
 
-def finalize_story(story_id: str) -> dict:
+async def finalize_story(story_id: str) -> dict:
 
     story_data = active_stories[story_id]
 
@@ -469,7 +469,7 @@ def finalize_story(story_id: str) -> dict:
     print("image saved")
     save_story_data(story_data, folder=os.sep.join(["Stories", str(story_id)]))
 
-    images_to_video(os.sep.join(["Stories", str(story_id), "ConnectionsTimeline.mp4"]))
+    images_to_video(os.sep.join(["Stories", str(story_id), "Graphs"]), os.sep.join(["Stories", str(story_id), "ConnectionsTimeline.mp4"]))
 
     return story_data, final_image_url
 

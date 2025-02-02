@@ -114,9 +114,9 @@ async def start(ctx):
     await ctx.send(f'The end!')
     
 async def finalise(ctx, id):
-    data, imgurl = finalize_story(id)
+    data, imgurl = await finalize_story(id)
     story = data["currentStoryText"]
-    embed = discord.Embed(title= active_stories[id]["title"], description=story, color=discord.Color.blue())
+    embed = discord.Embed(title= data["title"], description=story, color=discord.Color.blue())
     embed.set_image(url=imgurl)
     
     await ctx.send(embed=embed)
