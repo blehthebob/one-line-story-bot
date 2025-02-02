@@ -62,14 +62,14 @@ class StoryManager:
             parent_id = self.current_node_id
             node_id = str(uuid.uuid4())
             db.execute("INSERT INTO story (id, content, parent_id, branch_name, user, votes) VALUES (?, ?, ?, ?, ?, ?)", 
-                       (node_id, f"[Branch {branch_name} begins]", parent_id, branch_name, "system", 0))
+                       (node_id, "", parent_id, branch_name, "system", 0))
             db.commit()
             self.current_node_id = node_id
         return f"Branched into `{branch_name}` from highest voted node!"
 
     def switch_branch(self, branch_name):
         with sqlite3.connect(self.db_path) as db:
-            cursor = db.execute("SELECT 1 FROM story WHERE branch_name = ? LIMIT 1", (branch_name,))
+            cursor = db.execute("SELECT 1 FROM story WHERE branch_name = ? ORDER BY ROWID DESC LIMIT 1", (branch_name,))
             if cursor.fetchone():
                 self.current_branch = branch_name
                 self.current_node_id = cursor.fetchone()[0]
@@ -95,25 +95,3 @@ class StoryManager:
         
         root_nodes = [node_id for node_id, (_, parent_id, _) in tree.items() if parent_id is None]
         return "\n".join(build_tree(root) for root in root_nodes)
-
-sm = StoryManager()
-
-sm.start_story("101")
-
-sm.add_candidate_node("yo", "101")
-
-sm.add_candidate_node("yo1", "102")
-
-nodes = sm.get_candidate_nodes()
-
-sm.vote_node(nodes[0][0])
-
-nodes = sm.get_candidate_nodes()
-
-print(nodes)
-
-print(sm.select_candidate_node())
-
-print(sm.add_candidate_node("yo", "101"))
-
-print(sm.generate_graph())
