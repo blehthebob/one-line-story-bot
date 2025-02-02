@@ -1,0 +1,55 @@
+
+{
+    "storyId": story_id,
+    "title": "",  //to be populated by llm
+    "currentStoryText": starter_line,
+    "storyMetadata": {
+      "genre": "", //to be populated by llm
+      "tone": "",  //to be populated by llm
+      "style": "",  //to be populated by llm
+      "promptPersonality": personality,
+      "themeKeywords": [],  //to be populated by llm
+      "createdBy": "DiscordUser#1234",
+      "creationDate": "2025-02-01T10:15:00Z",
+      "lastUpdated": "2025-02-01T13:42:00Z"
+    },
+    "chapters": [
+      {
+        "lines": [
+          {
+            "lineId": "line-001",
+            "text": "",
+            "addedBy": "DiscordUser#1111",
+            "timestamp": "2025-02-01T10:20:00Z"
+          },
+          {
+            "lineId": "line-002",
+            "text": "",
+            "addedBy": "DiscordUser#2222",
+            "timestamp": "2025-02-01T10:25:00Z"
+          }
+        ],
+        "storySummary": ""  //to be populated by llm
+      }
+    ],
+    "characters": [
+      {
+        "name": "",  //to be populated by llm
+        "description": "",  //to be populated by llm
+        "status": "",  //to be populated by llm
+        "traits": []  //to be populated by llm
+      }
+    ],
+    "settings": [
+      {
+        "locationName": "",  //to be populated by llm
+        "description": "",  //to be populated by llm
+        "keyDetails": []  //to be populated by llm
+      }
+    ],
+    "storyConfig": {
+      "language": "English",
+      "allowBranching": false
+    }
+  }
+  
