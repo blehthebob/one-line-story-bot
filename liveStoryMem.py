@@ -178,28 +178,65 @@ def add_new_line_and_update(story_data: dict, new_line: str, added_by: str):
 
     # 2. LLM prompt to extract new characters/settings from the latest line
     prompt_extract = f"""
-    The story so far is:\n{story_data['currentStoryText']}
+    The story so far is:
+    {story_data['currentStoryText']}
+
     The latest line is: "{new_line}"
 
-    Please return JSON with keys if new characters or settings have been found:
+    If any new characters have been introduced or revealed with more details, 
+    please include them in JSON under the key "newCharacters". 
+    Each character should have:
+    - "name"
+    - "description"
+    - "status"
+    - "traits" (an array)
+    - (optionally) "opinionsOf" (an array of objects representing opinions about specific characters):
+        [
+        {{
+            "characterName": "...",
+            "opinionText": "...",
+            "trustLevel": 0
+        }},
+        ...
+        ]
+
+    If any new settings (locations) have been introduced or revealed, 
+    please include them in JSON under the key "newSettings", each with:
+    - "locationName"
+    - "description"
+    - "keyDetails" (an array of strings)
+
+    Return valid JSON with these exact top-level keys if relevant:
+
     "newCharacters": [
-      {{
-        "name":"...",
-        "description":"...",
-        "status":"...",
-        "traits":[]
-      }},
-      ...
+    {{
+        "name": "...",
+        "description": "...",
+        "status": "...",
+        "traits": [],
+        "opinionsOf": [
+        {{
+            "characterName": "...",
+            "opinionText": "...",
+            "trustLevel": 0
+        }},
+        ...
+        ]
+    }},
+    ...
     ],
     "newSettings": [
-      {{
-        "locationName":"...",
-        "description":"...",
-        "keyDetails":[]
-      }},
-      ...
+    {{
+        "locationName": "...",
+        "description": "...",
+        "keyDetails": []
+    }},
+    ...
     ]
+
+    Omit any sections (or keys) that are not applicable.
     """
+
     raw_response = call_llm_api(prompt_extract)
     extracted_data = parse_llm_json_response(raw_response)
 
@@ -305,6 +342,7 @@ def finalize_story(story_id: str) -> dict:
 #print(active_stories[1234]["currentStoryText"])
 #x = input()
 #add_new_line_and_update_by_id(1234, x, "me")
-#complete_story = finalize_story(1234)
 #add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
+#complete_story = finalize_story(1234)
 #print(complete_story["currentStoryText"])
+#print(complete_story)
