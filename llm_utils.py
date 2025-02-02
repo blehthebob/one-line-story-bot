@@ -41,14 +41,13 @@ def generate_next_line_candidates_list(story_context: str, num_candidates=3, mod
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        temperature=0.8,
+        temperature=1.5,
         max_tokens=300
     )
 
     choices = response.choices
     chat_completion = choices[0]
     content = chat_completion.message.content
-
     return content
 
 
