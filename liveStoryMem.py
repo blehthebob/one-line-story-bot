@@ -88,6 +88,7 @@ def generate_initial_story_metadata(starter_line: str) -> dict:
     """
     raw_response = call_llm_api(prompt)
     data = parse_llm_json_response(raw_response)
+
     return data
 
 def add_new_line_and_update_by_id(story_id: str, new_line: str, added_by: str): # New line is llmed or discord (need logic), we manage story id, added by is from discord
@@ -121,18 +122,19 @@ def parse_llm_json_response(llm_response_text: str) -> dict:
         return {}
 
 
-def set_story_metadata(story_data: dict, metadata: dict):
+def set_story_metadata(story_data: dict, extracted_data: dict):
     """
     Given the story data and a metadata dict from generate_initial_story_metadata,
     set the relevant fields in the JSON structure.
     """
-    story_data["title"] = metadata.get("title", "")
-    story_data["storyMetadata"]["genre"] = metadata.get("genre", "")
-    story_data["storyMetadata"]["tone"] = metadata.get("tone", "")
-    story_data["storyMetadata"]["style"] = metadata.get("style", "")
-    story_data["storyMetadata"]["themeKeywords"] = metadata.get("themeKeywords", [])
-
+    story_data["title"] = extracted_data.get("title", "")
+    story_data["storyMetadata"]["genre"] = extracted_data.get("genre", "")
+    story_data["storyMetadata"]["tone"] = extracted_data.get("tone", "")
+    story_data["storyMetadata"]["style"] = extracted_data.get("style", "")
+    story_data["storyMetadata"]["themeKeywords"] = extracted_data.get("themeKeywords", [])
     story_data["storyMetadata"]["lastUpdated"] = datetime.utcnow().isoformat()
+
+
 
 def generate_story_summary(full_story_text: str) -> str:
     """
@@ -337,12 +339,13 @@ def finalize_story(story_id: str) -> dict:
     return story_data
 
 # Example use
-#create_story(1234, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
-#add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
-#print(active_stories[1234]["currentStoryText"])
+#story_id = 1234
+#create_story(story_id, "Once upon time there was a very sleep university student who wanted to", "desolate", "me")
+#add_new_line_and_update_by_id(story_id, accept_winning_line(generate_next_line_candidates_list(active_stories[story_id]["currentStoryText"],personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0), "llm")
+#print(active_stories[story_id]["currentStoryText"])
 #x = input()
-#add_new_line_and_update_by_id(1234, x, "me")
-#add_new_line_and_update_by_id(1234, accept_winning_line(generate_next_line_candidates_list(active_stories[1234]["currentStoryText"],personality=active_stories[1234]["storyMetadata"]["promptPersonality"]), 0), "llm")
-#complete_story = finalize_story(1234)
+#add_new_line_and_update_by_id(story_id, x, "me")
+#add_new_line_and_update_by_id(story_id, accept_winning_line(generate_final_line_candidates_list(active_stories[story_id]["currentStoryText"], personality=active_stories[story_id]["storyMetadata"]["promptPersonality"]), 0 ), "llm")
+#complete_story = finalize_story(story_id)
 #print(complete_story["currentStoryText"])
 #print(complete_story)
